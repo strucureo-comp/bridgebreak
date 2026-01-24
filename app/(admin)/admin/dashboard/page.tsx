@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [pendingProjects, setPendingProjects] = useState<Project[]>([]);
   const [supportRequests, setSupportRequests] = useState<SupportRequest[]>([]);
   const [totalClients, setTotalClients] = useState(0);
+  const [totalProjects, setTotalProjects] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function AdminDashboard() {
     const usersData = await getUsers();
 
     const recentProjects = projectsData.slice(0, 5);
-    const pendingProjectsData = projectsData.filter(p => p.status === 'pending');
+    const pendingProjectsData = projectsData.filter(p => ['pending', 'under_review'].includes(p.status));
     const activeSupportRequests = supportData.filter(s => ['open', 'in_progress'].includes(s.status)).slice(0, 5);
     const clientCount = usersData.filter(u => u.role === 'client').length;
 
@@ -39,6 +40,7 @@ export default function AdminDashboard() {
     setPendingProjects(pendingProjectsData);
     setSupportRequests(activeSupportRequests);
     setTotalClients(clientCount);
+    setTotalProjects(projectsData.length);
     setLoading(false);
   };
 
@@ -73,7 +75,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <StatsCard
             title="Total Clients"
             value={totalClients}
@@ -82,7 +84,7 @@ export default function AdminDashboard() {
           />
           <StatsCard
             title="All Projects"
-            value={projects.length}
+            value={totalProjects}
             icon={FolderKanban}
             description="Total submissions"
           />

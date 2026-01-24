@@ -23,6 +23,21 @@ export type MemberStatus = 'active' | 'inactive';
 
 export type NotificationType = 'project' | 'payment' | 'support' | 'meeting' | 'system';
 
+export type TransactionType = 'income' | 'expense';
+
+export interface Transaction {
+  id: string;
+  type: TransactionType;
+  amount: number;
+  category: string;
+  description: string;
+  date: string;
+  attachment_url?: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -197,4 +212,14 @@ export interface SystemSettings {
   key: string;
   value: Record<string, any>;
   updated_at: string;
+}
+
+export interface PlanningNote {
+  id: string;
+  title: string;
+  content: string;
+  category: 'idea' | 'strategy' | 'todo' | 'other';
+  created_by: string;
+  updated_at: string;
+  created_at: string;
 }

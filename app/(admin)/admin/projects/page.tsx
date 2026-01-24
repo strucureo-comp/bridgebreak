@@ -46,16 +46,19 @@ export default function AdminProjectsPage() {
         </div>
 
         <Tabs defaultValue="all" className="space-y-6">
-          <TabsList className="bg-muted/50 p-1">
+          <TabsList className="bg-muted/50 p-1 flex-wrap h-auto">
             <TabsTrigger value="all" className="px-6">All ({projects.length})</TabsTrigger>
             <TabsTrigger value="pending" className="px-6">
-              Pending ({filterProjects(['pending']).length})
+              Pending ({filterProjects(['pending', 'under_review']).length})
             </TabsTrigger>
             <TabsTrigger value="active" className="px-6">
               Active ({filterProjects(['accepted', 'in_progress', 'testing']).length})
             </TabsTrigger>
             <TabsTrigger value="completed" className="px-6">
               Completed ({filterProjects(['completed']).length})
+            </TabsTrigger>
+            <TabsTrigger value="cancelled" className="px-6">
+              Cancelled ({filterProjects(['cancelled']).length})
             </TabsTrigger>
           </TabsList>
 
@@ -74,7 +77,7 @@ export default function AdminProjectsPage() {
           </TabsContent>
 
           <TabsContent value="pending">
-            <ProjectGrid projects={filterProjects(['pending'])} onProjectClick={(id) => router.push(`/admin/projects/${id}`)} />
+            <ProjectGrid projects={filterProjects(['pending', 'under_review'])} onProjectClick={(id) => router.push(`/admin/projects/${id}`)} />
           </TabsContent>
 
           <TabsContent value="active">
@@ -83,6 +86,10 @@ export default function AdminProjectsPage() {
 
           <TabsContent value="completed">
             <ProjectGrid projects={filterProjects(['completed'])} onProjectClick={(id) => router.push(`/admin/projects/${id}`)} />
+          </TabsContent>
+
+          <TabsContent value="cancelled">
+            <ProjectGrid projects={filterProjects(['cancelled'])} onProjectClick={(id) => router.push(`/admin/projects/${id}`)} />
           </TabsContent>
         </Tabs>
       </div>

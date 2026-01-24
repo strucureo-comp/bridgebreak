@@ -22,6 +22,8 @@ import type {
   TeamMember,
   SalaryPayment,
   Notification,
+  Transaction,
+  PlanningNote,
 } from '@/lib/db/types';
 
 function cleanData(data: any) {
@@ -578,3 +580,148 @@ export async function updateMeeting(meetingId: string, updates: Partial<MeetingR
   }
 }
 
+
+export async function getTransactions(): Promise<Transaction[]> {
+  try {
+    const transactionsRef = ref(database, 'transactions');
+    const snapshot = await get(transactionsRef);
+
+    if (!snapshot.exists()) return [];
+
+    const transactions: Transaction[] = [];
+    snapshot.forEach((childSnapshot) => {
+      transactions.push({ id: childSnapshot.key, ...childSnapshot.val() } as Transaction);
+    });
+
+    return transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  } catch (error) {
+    console.error('Error getting transactions:', error);
+    return [];
+  }
+}
+
+export async function createTransaction(transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>): Promise<string | null> {
+  try {
+    const transactionsRef = ref(database, 'transactions');
+    const newTransactionRef = push(transactionsRef);
+
+    const transactionData = cleanData({
+      ...transaction,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
+    await set(newTransactionRef, transactionData);
+    return newTransactionRef.key;
+  } catch (error) {
+    console.error('Error creating transaction:', error);
+    return null;
+  }
+}
+
+export async function deleteTransaction(transactionId: string): Promise<boolean> {
+  try {
+    const transactionRef = ref(database, `transactions/${transactionId}`);
+    await remove(transactionRef);
+    return true;
+  } catch (error) {
+    console.error('Error deleting transaction:', error);
+    return false;
+  }
+}
+
+export async function getSystemSetting(key: string): Promise<any> {
+  try {
+    const settingsRef = ref(database, `system_settings/${key}`);
+    const snapshot = await get(settingsRef);
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (error) {
+    console.error(`Error getting system setting ${key}:`, error);
+    return null;
+  }
+}
+
+export async function setSystemSetting(key: string, value: any): Promise<boolean> {
+  try {
+    const settingsRef = ref(database, `system_settings/${key}`);
+    await set(settingsRef, value);
+    return true;
+  } catch (error) {
+    console.error(`Error setting system setting ${key}:`, error);
+    return false;
+  }
+}
+
+export async function deleteInvoice(invoiceId: string): Promise<boolean> {
+  try {
+    const invoiceRef = ref(database, `invoices/${invoiceId}`);
+    await remove(invoiceRef);
+    return true;
+  } catch (error) {
+    console.error('Error deleting invoice:', error);
+    return false;
+  }
+}
+
+export async function getPlanningNotes(): Promise<PlanningNote[]> {
+  try {
+    const notesRef = ref(database, 'admin_notes');
+    const snapshot = await get(notesRef);
+
+    if (!snapshot.exists()) return [];
+
+    const notes: PlanningNote[] = [];
+    snapshot.forEach((childSnapshot) => {
+      notes.push({ id: childSnapshot.key, ...childSnapshot.val() } as PlanningNote);
+    });
+
+    return notes.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+  } catch (error) {
+    console.error('Error getting planning notes:', error);
+    return [];
+  }
+}
+
+export async function createPlanningNote(note: Omit<PlanningNote, 'id' | 'created_at' | 'updated_at'>): Promise<string | null> {
+  try {
+    const notesRef = ref(database, 'admin_notes');
+    const newNoteRef = push(notesRef);
+
+    const noteData = cleanData({
+      ...note,
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+    });
+
+    await set(newNoteRef, noteData);
+    return newNoteRef.key;
+  } catch (error) {
+    console.error('Error creating planning note:', error);
+    return null;
+  }
+}
+
+export async function updatePlanningNote(noteId: string, updates: Partial<PlanningNote>): Promise<boolean> {
+  try {
+    const noteRef = ref(database, `admin_notes/${noteId}`);
+    await update(noteRef, cleanData({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    }));
+    return true;
+  } catch (error) {
+    console.error('Error updating planning note:', error);
+    return false;
+  }
+}
+
+export async function deletePlanningNote(noteId: string): Promise<boolean> {
+  try {
+    const noteRef = ref(database, `admin_notes/${noteId}`);
+    await remove(noteRef);
+    return true;
+  } catch (error) {
+    console.error('Error deleting planning note:', error);
+    return false;
+  }
+}

@@ -14,6 +14,7 @@ import {
     DollarSign,
     UserCog,
     Settings,
+    CreditCard,
 } from 'lucide-react';
 
 interface NavItem {
@@ -106,6 +107,12 @@ const adminNavItems: NavItem[] = [
         role: 'admin',
     },
     {
+        title: 'Plans',
+        href: '/admin/plans',
+        icon: CreditCard,
+        role: 'admin',
+    },
+    {
         title: 'Settings',
         href: '/admin/settings',
         icon: Settings,
@@ -117,11 +124,28 @@ interface DashboardNavProps {
     onNavClick?: () => void;
 }
 
+// ... (imports remain the same)
 export function DashboardNav({ onNavClick }: DashboardNavProps) {
     const pathname = usePathname();
     const { user } = useAuth();
 
-    const navItems = user?.role === 'admin' ? adminNavItems : clientNavItems;
+    const allowedFinanceEmails = [
+        'viyasramachandran@gmail.com',
+        'aathish@strucureo.works',
+        'aathihacker2004@gmail.com',
+    ];
+
+    let navItems = user?.role === 'admin' ? adminNavItems : clientNavItems;
+
+    // Filter out Finance tab if user is not authorized
+    if (user?.role === 'admin') {
+        navItems = navItems.filter(item => {
+            if (item.title === 'Finance') {
+                return user.email && allowedFinanceEmails.includes(user.email.toLowerCase()); // Ensure lower case match
+            }
+            return true;
+        });
+    }
 
     return (
         <nav className="flex flex-col gap-1 p-4">

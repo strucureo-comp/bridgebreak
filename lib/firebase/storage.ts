@@ -13,17 +13,13 @@ export async function uploadProjectProjectPreview(projectId: string, file: File)
             });
 
         if (error) {
-            if (error.message.includes('bucket not found')) {
-                console.error('Supabase bucket "projects" not found. Please create it in the Supabase console and set it to PUBLIC.');
-            }
-            throw error;
+            console.error('Supabase upload error:', error);
+            return null;
         }
 
         const { data: { publicUrl } } = supabase.storage
             .from('projects')
             .getPublicUrl(filePath);
-
-        if (!publicUrl) throw new Error('Could not generate public URL');
 
         return publicUrl;
     } catch (error) {
@@ -32,7 +28,7 @@ export async function uploadProjectProjectPreview(projectId: string, file: File)
     }
 }
 
-// Keeping the old name for backward compatibility if needed, but routing to Supabase
+// Keeping the old name for backward compatibility if needed
 export const uploadProjectImage = uploadProjectProjectPreview;
 
 export async function uploadTicketAttachment(projectId: string, file: File): Promise<string | null> {
@@ -47,7 +43,10 @@ export async function uploadTicketAttachment(projectId: string, file: File): Pro
                 upsert: false
             });
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase upload error:', error);
+            return null;
+        }
 
         const { data: { publicUrl } } = supabase.storage
             .from('projects')
@@ -55,7 +54,7 @@ export async function uploadTicketAttachment(projectId: string, file: File): Pro
 
         return publicUrl;
     } catch (error) {
-        console.error('Error uploading ticket attachment:', error);
+        console.error('Error uploading ticket attachment to Supabase:', error);
         return null;
     }
 }

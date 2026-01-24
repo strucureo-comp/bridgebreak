@@ -2,20 +2,26 @@ import { supabase } from './client';
 
 export const uploadFile = async (bucket: string, path: string, file: File) => {
     try {
-        const { data, error } = await supabase.storage
-            .from(bucket)
-            .upload(path, file, {
-                cacheControl: '3600',
-                upsert: false,
-            });
+        // Sanitize path/filename
+        const sanitizedPath = path.split('/').map(p => p.replace(/[^a-zA-Z0-9.-]/g, '_')).join('/');
 
-        if (error) throw error;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('bucket', bucket);
+        formData.append('path', sanitizedPath);
 
-        const { data: { publicUrl } } = supabase.storage
-            .from(bucket)
-            .getPublicUrl(data.path);
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+        });
 
-        return publicUrl;
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Upload failed');
+        }
+
+        const data = await response.json();
+        return data.url;
     } catch (error) {
         console.error('Error uploading file:', error);
         throw error;

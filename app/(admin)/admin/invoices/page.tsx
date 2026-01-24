@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/firebase/auth-context';
-import { getInvoices } from '@/lib/firebase/database';
+import { Trash2, Plus, FileText } from 'lucide-react';
+import { getInvoices, deleteInvoice } from '@/lib/firebase/database';
+import { toast } from 'sonner';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText } from 'lucide-react';
 import { EmptyState } from '@/components/common/empty-state';
 import type { Invoice } from '@/lib/db/types';
 
@@ -28,6 +29,19 @@ export default function AdminInvoicesPage() {
     const data = await getInvoices();
     setInvoices(data);
     setLoading(false);
+  };
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this invoice?')) {
+      const success = await deleteInvoice(id);
+      if (success) {
+        setInvoices((prev) => prev.filter((inv) => inv.id !== id));
+        toast.success('Invoice deleted');
+      } else {
+        toast.error('Failed to delete invoice');
+      }
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -89,7 +103,17 @@ export default function AdminInvoicesPage() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-xl">{invoice.invoice_number}</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-xl">{invoice.invoice_number}</CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={(e) => handleDelete(e, invoice.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                       <p className="text-sm text-muted-foreground mt-2">
                         Due: {new Date(invoice.due_date).toLocaleDateString()}
                       </p>
