@@ -88,6 +88,8 @@ export interface Project {
   }>;
   notes?: string[];
 
+  is_featured?: boolean; // Mark project as featured for portfolio/showcase
+
   created_at: string;
   updated_at: string;
 }
@@ -207,6 +209,42 @@ export interface Notification {
   created_at: string;
 }
 
+
+
+export type QuotationStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
+
+export interface QuotationItem {
+  description: string;
+  quantity: number;
+  unit_price: number;
+  total: number;
+}
+
+export interface Quotation {
+  id: string;
+  project_id?: string;
+  project_title?: string; // Snapshot or manual
+  client_id: string; // Can be empty if manual
+  quotation_number: string;
+  amount: number;
+  valid_until: string;
+  status: QuotationStatus;
+  currency: string;
+  description?: string;
+  items: QuotationItem[];
+  notes?: string;
+
+  // Manual Client Details (Non-registered)
+  client_name?: string;
+  client_email?: string;
+  client_company?: string;
+  client_address?: string;
+  client_is_company?: boolean;
+
+  created_at: string;
+  updated_at: string;
+}
+
 export interface SystemSettings {
   id: string;
   key: string;
@@ -222,4 +260,38 @@ export interface PlanningNote {
   created_by: string;
   updated_at: string;
   created_at: string;
+}
+
+export type EnquiryStatus = 'new' | 'read' | 'replied' | 'converted';
+
+export interface Enquiry {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  phone?: string;
+  status: EnquiryStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost';
+
+export interface Lead {
+  id: string;
+  name: string;
+  email: string;
+  company?: string;
+  phone?: string;
+  status: LeadStatus;
+  source?: string;
+  potential_value?: number;
+  probability?: number;
+  notes?: string;
+  last_contacted?: string;
+  next_follow_up?: string;
+  follow_up_notes?: string;
+  created_at: string;
+  updated_at: string;
 }

@@ -107,7 +107,7 @@ export default function InvoiceDetailPage({ params }: { params: { id: string } }
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              onClick={() => generateInvoicePDF(invoice, project, user || null)}
+              onClick={() => generateInvoicePDF(invoice, user || null, project)}
             >
               <Download className="mr-2 h-4 w-4" />
               Download PDF

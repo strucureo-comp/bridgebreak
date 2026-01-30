@@ -19,6 +19,7 @@ import { DollarSign, TrendingUp, TrendingDown, Users, Plus, Paperclip, Trash2, C
 import { toast } from 'sonner';
 import type { Invoice, Transaction, TransactionType } from '@/lib/db/types';
 import { cn } from '@/lib/utils';
+import { FinanceCharts } from '@/components/admin/finance-charts';
 
 export default function AdminFinancePage() {
   const router = useRouter();
@@ -172,6 +173,24 @@ export default function AdminFinancePage() {
   const pendingRevenue = invoices
     .filter((inv) => inv.status === 'pending')
     .reduce((sum, inv) => sum + inv.amount, 0);
+
+  const combinedTransactions = [...transactions];
+  invoices.forEach(inv => {
+    if (inv.status === 'paid') {
+      combinedTransactions.push({
+        id: inv.id,
+        amount: inv.amount,
+        type: 'income',
+        description: `Invoice #${inv.invoice_number}`,
+        category: 'Project Revenue',
+        date: inv.paid_at || inv.updated_at,
+        created_by: 'system',
+        created_at: inv.created_at,
+        updated_at: inv.updated_at
+      } as Transaction);
+    }
+  });
+  combinedTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <DashboardShell requireAdmin>
@@ -331,6 +350,8 @@ export default function AdminFinancePage() {
           />
         </div>
 
+        <FinanceCharts invoices={invoices} transactions={transactions} />
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Transactions</TabsTrigger>
@@ -345,7 +366,7 @@ export default function AdminFinancePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {transactions.length === 0 ? (
+                {combinedTransactions.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
                     <FileText className="h-12 w-12 mb-4 opacity-20" />
                     <p className="text-lg font-medium">No transactions yet</p>
@@ -369,7 +390,7 @@ export default function AdminFinancePage() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {transactions.map((t) => (
+                          {combinedTransactions.map((t) => (
                             <TableRow key={t.id}>
                               <TableCell className="whitespace-nowrap">{new Date(t.date).toLocaleDateString()}</TableCell>
                               <TableCell>
@@ -400,9 +421,12 @@ export default function AdminFinancePage() {
                                       </a>
                                     </Button>
                                   )}
-                                  <Button variant="ghost" size="icon" onClick={() => handleDeleteTransaction(t.id)} title="Delete">
-                                    <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                                  </Button>
+                                  {/* Only allow deleting manual transactions, not invoices mapped as transactions */}
+                                  {!t.description.startsWith('Invoice #') && (
+                                    <Button variant="ghost" size="icon" onClick={() => handleDeleteTransaction(t.id)} title="Delete">
+                                      <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                                    </Button>
+                                  )}
                                 </div>
                               </TableCell>
                             </TableRow>

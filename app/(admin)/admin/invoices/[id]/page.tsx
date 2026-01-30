@@ -136,7 +136,7 @@ export default function EditInvoicePage({ params }: { params: { id: string } }) 
                             const project = projects.find(p => p.id === formData.project_id);
                             const client = users.find(u => u.id === formData.client_id);
                             if (originalInvoice) {
-                                generateInvoicePDF(originalInvoice, project || null, client || null);
+                                generateInvoicePDF(originalInvoice, client || null, project || null);
                             }
                         }}
                     >

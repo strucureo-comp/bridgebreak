@@ -24,6 +24,9 @@ import type {
   Notification,
   Transaction,
   PlanningNote,
+  Quotation,
+  Enquiry,
+  Lead,
 } from '@/lib/db/types';
 
 function cleanData(data: any) {
@@ -722,6 +725,210 @@ export async function deletePlanningNote(noteId: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('Error deleting planning note:', error);
+    return false;
+  }
+}
+
+export async function getQuotations(clientId?: string): Promise<Quotation[]> {
+  try {
+    const quotationsRef = ref(database, 'quotations');
+    const snapshot = await get(quotationsRef);
+
+    if (!snapshot.exists()) return [];
+
+    const quotations: Quotation[] = [];
+    snapshot.forEach((childSnapshot) => {
+      const quotation = { id: childSnapshot.key, ...childSnapshot.val() } as Quotation;
+      if (!clientId || quotation.client_id === clientId) {
+        quotations.push(quotation);
+      }
+    });
+
+    return quotations.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  } catch (error) {
+    console.error('Error getting quotations:', error);
+    return [];
+  }
+}
+
+export async function getQuotation(quotationId: string): Promise<Quotation | null> {
+  try {
+    const quotationRef = ref(database, `quotations/${quotationId}`);
+    const snapshot = await get(quotationRef);
+
+    if (!snapshot.exists()) return null;
+
+    return { id: snapshot.key, ...snapshot.val() } as Quotation;
+  } catch (error) {
+    console.error('Error getting quotation:', error);
+    return null;
+  }
+}
+
+export async function createQuotation(quotation: Omit<Quotation, 'id' | 'created_at' | 'updated_at'>): Promise<string | null> {
+  try {
+    const quotationsRef = ref(database, 'quotations');
+    const newQuotationRef = push(quotationsRef);
+
+    const quotationData = cleanData({
+      ...quotation,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
+    await set(newQuotationRef, quotationData);
+
+    // Notify Client
+    await createNotification({
+      user_id: quotation.client_id,
+      title: 'New Quotation Received',
+      message: `You have received a new quotation ${quotation.quotation_number}.`,
+      type: 'payment', // reusing payment type or maybe system
+      link: `/quotations`, // Client side link
+      read: false
+    });
+
+    return newQuotationRef.key;
+  } catch (error) {
+    console.error('Error creating quotation:', error);
+    return null;
+  }
+}
+
+export async function updateQuotation(quotationId: string, updates: Partial<Quotation>): Promise<boolean> {
+  try {
+    const quotationRef = ref(database, `quotations/${quotationId}`);
+    await update(quotationRef, cleanData({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    }));
+    return true;
+  } catch (error) {
+    console.error('Error updating quotation:', error);
+    return false;
+  }
+}
+
+
+export async function deleteQuotation(quotationId: string): Promise<boolean> {
+  try {
+    const quotationRef = ref(database, `quotations/${quotationId}`);
+    await remove(quotationRef);
+    return true;
+  } catch (error) {
+    console.error('Error deleting quotation:', error);
+    return false;
+  }
+}
+
+// ----------------------------------------------------
+// ENQUIRY FUNCTIONS
+// ----------------------------------------------------
+
+export async function getEnquiries(): Promise<Enquiry[]> {
+  try {
+    const refPath = ref(database, 'enquiries');
+    const snapshot = await get(refPath);
+
+    if (!snapshot.exists()) return [];
+
+    const enquiries: Enquiry[] = [];
+    snapshot.forEach((childSnapshot) => {
+      enquiries.push({ id: childSnapshot.key, ...childSnapshot.val() } as Enquiry);
+    });
+
+    return enquiries.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  } catch (error) {
+    console.error('Error getting enquiries:', error);
+    return [];
+  }
+}
+
+export async function createEnquiry(enquiry: Omit<Enquiry, 'id' | 'created_at' | 'updated_at'>): Promise<string | null> {
+  try {
+    const refPath = ref(database, 'enquiries');
+    const newRef = push(refPath);
+
+    const data = cleanData({
+      ...enquiry,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
+    await set(newRef, data);
+    return newRef.key;
+  } catch (error) {
+    console.error('Error creating enquiry:', error);
+    return null;
+  }
+}
+
+export async function updateEnquiry(id: string, updates: Partial<Enquiry>): Promise<boolean> {
+  try {
+    const refPath = ref(database, `enquiries/${id}`);
+    await update(refPath, cleanData({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    }));
+    return true;
+  } catch (error) {
+    console.error('Error updating enquiry:', error);
+    return false;
+  }
+}
+
+// ----------------------------------------------------
+// LEAD FUNCTIONS
+// ----------------------------------------------------
+
+export async function getLeads(): Promise<Lead[]> {
+  try {
+    const refPath = ref(database, 'leads');
+    const snapshot = await get(refPath);
+
+    if (!snapshot.exists()) return [];
+
+    const leads: Lead[] = [];
+    snapshot.forEach((childSnapshot) => {
+      leads.push({ id: childSnapshot.key, ...childSnapshot.val() } as Lead);
+    });
+
+    return leads.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  } catch (error) {
+    console.error('Error getting leads:', error);
+    return [];
+  }
+}
+
+export async function createLead(lead: Omit<Lead, 'id' | 'created_at' | 'updated_at'>): Promise<string | null> {
+  try {
+    const refPath = ref(database, 'leads');
+    const newRef = push(refPath);
+
+    const data = cleanData({
+      ...lead,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
+    await set(newRef, data);
+    return newRef.key;
+  } catch (error) {
+    console.error('Error creating lead:', error);
+    return null;
+  }
+}
+
+export async function updateLead(id: string, updates: Partial<Lead>): Promise<boolean> {
+  try {
+    const refPath = ref(database, `leads/${id}`);
+    await update(refPath, cleanData({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    }));
+    return true;
+  } catch (error) {
+    console.error('Error updating lead:', error);
     return false;
   }
 }

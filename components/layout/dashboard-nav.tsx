@@ -15,6 +15,10 @@ import {
     UserCog,
     Settings,
     CreditCard,
+    ScrollText,
+    Inbox,
+    Target,
+    Map,
 } from 'lucide-react';
 
 interface NavItem {
@@ -65,9 +69,27 @@ const adminNavItems: NavItem[] = [
         role: 'admin',
     },
     {
+        title: 'Enquiries',
+        href: '/admin/enquiries',
+        icon: Inbox,
+        role: 'admin',
+    },
+    {
+        title: 'Leads',
+        href: '/admin/leads',
+        icon: Target,
+        role: 'admin',
+    },
+    {
         title: 'Projects',
         href: '/admin/projects',
         icon: FolderKanban,
+        role: 'admin',
+    },
+    {
+        title: 'Planning',
+        href: '/admin/planning',
+        icon: Map,
         role: 'admin',
     },
     {
@@ -92,6 +114,12 @@ const adminNavItems: NavItem[] = [
         title: 'Invoices',
         href: '/admin/invoices',
         icon: FileText,
+        role: 'admin',
+    },
+    {
+        title: 'Quotations',
+        href: '/admin/quotations',
+        icon: ScrollText,
         role: 'admin',
     },
     {
