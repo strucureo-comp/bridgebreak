@@ -334,19 +334,24 @@ export default function AdminFinancePage() {
             value={`$${currentBalance.toFixed(2)}`}
             description="Net Cash on Hand"
             icon={DollarSign}
-            className={currentBalance >= 0 ? "border-l-4 border-l-green-500" : "border-l-4 border-l-red-500"}
+            iconColor={currentBalance >= 0 ? "text-green-600" : "text-red-600"}
+            iconBgColor={currentBalance >= 0 ? "bg-green-100" : "bg-red-100"}
           />
           <StatsCard
             title="Total Revenue"
             value={`$${totalRevenue.toFixed(2)}`}
             description="Invoices + Manual Income"
             icon={TrendingUp}
+            iconColor="text-blue-600"
+            iconBgColor="bg-blue-100"
           />
           <StatsCard
             title="Total Expenses"
             value={`$${totalExpenses.toFixed(2)}`}
             description="Operational Costs"
             icon={TrendingDown}
+            iconColor="text-orange-600"
+            iconBgColor="bg-orange-100"
           />
         </div>
 

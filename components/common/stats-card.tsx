@@ -12,22 +12,43 @@ interface StatsCardProps {
     isPositive: boolean;
   };
   className?: string;
+  iconColor?: string; // e.g. "text-blue-500"
+  iconBgColor?: string; // e.g. "bg-blue-100"
 }
 
-export function StatsCard({ title, value, description, icon: Icon, trend, className }: StatsCardProps) {
+export function StatsCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  trend,
+  className,
+  iconColor = "text-muted-foreground",
+  iconBgColor = "bg-muted/20"
+}: StatsCardProps) {
   return (
-    <Card className={cn(className)}>
+    <Card className={cn(
+      "overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1",
+      className
+    )}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        {Icon && (
+          <div className={cn("p-2 rounded-full", iconBgColor)}>
+            <Icon className={cn("h-4 w-4", iconColor)} />
+          </div>
+        )}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-2xl font-bold tracking-tight">{value}</div>
         {(description || trend) && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
             {trend && (
-              <span className={trend.isPositive ? 'text-green-600' : 'text-red-600'}>
-                {trend.isPositive ? '+' : '-'}{Math.abs(trend.value)}%
+              <span className={cn(
+                "font-medium",
+                trend.isPositive ? 'text-green-600' : 'text-red-600'
+              )}>
+                {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
               </span>
             )}
             {description && <span>{description}</span>}

@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/firebase/auth-context';
 import { Header } from './header';
 import { Sidebar } from './sidebar';
 import { Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -20,6 +21,7 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     if (!loading && requireAuth) {
@@ -51,8 +53,13 @@ export function DashboardShell({
     <div className="min-h-screen">
       <Header />
       <div className="flex">
-        <Sidebar />
-        <main className="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-6">{children}</main>
+        <Sidebar isCollapsed={isCollapsed} toggleCollapse={() => setIsCollapsed(!isCollapsed)} />
+        <main className={cn(
+          "flex-1 p-4 md:p-8 pt-6 transition-all duration-300 ease-in-out",
+          isCollapsed ? "ml-0 md:ml-[80px]" : "ml-0 md:ml-64"
+        )}>
+          {children}
+        </main>
       </div>
     </div>
   );

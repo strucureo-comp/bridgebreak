@@ -20,6 +20,12 @@ import {
     Target,
     Map,
 } from 'lucide-react';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface NavItem {
     title: string;
@@ -28,7 +34,7 @@ interface NavItem {
     role?: 'client' | 'admin';
 }
 
-const clientNavItems: NavItem[] = [
+export const clientNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
@@ -61,7 +67,7 @@ const clientNavItems: NavItem[] = [
     },
 ];
 
-const adminNavItems: NavItem[] = [
+export const adminNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/admin/dashboard',
@@ -150,12 +156,14 @@ const adminNavItems: NavItem[] = [
 
 interface DashboardNavProps {
     onNavClick?: () => void;
+    isCollapsed?: boolean;
 }
 
 // ... (imports remain the same)
-export function DashboardNav({ onNavClick }: DashboardNavProps) {
+export function DashboardNav({ onNavClick, isCollapsed }: DashboardNavProps) {
     const pathname = usePathname();
     const { user } = useAuth();
+    // ...
 
     const allowedFinanceEmails = [
         'viyasramachandran@gmail.com',
@@ -173,6 +181,40 @@ export function DashboardNav({ onNavClick }: DashboardNavProps) {
             }
             return true;
         });
+    }
+
+    if (isCollapsed) {
+        return (
+            <TooltipProvider delayDuration={0}>
+                <nav className="flex flex-col gap-2 p-2 items-center group">
+                    {navItems.map((item, index) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+
+                        return (
+                            <Tooltip key={index}>
+                                <TooltipTrigger asChild>
+                                    <Link
+                                        href={item.href}
+                                        onClick={onNavClick}
+                                        className={cn(
+                                            'flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8',
+                                            isActive && 'bg-accent text-accent-foreground'
+                                        )}
+                                    >
+                                        <Icon className="h-5 w-5" />
+                                        <span className="sr-only">{item.title}</span>
+                                    </Link>
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="flex items-center gap-4">
+                                    {item.title}
+                                </TooltipContent>
+                            </Tooltip>
+                        );
+                    })}
+                </nav>
+            </TooltipProvider>
+        );
     }
 
     return (
