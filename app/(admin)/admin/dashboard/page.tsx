@@ -11,7 +11,20 @@ import type { Project, SupportRequest, Invoice, Transaction } from '@/lib/db/typ
 import Link from 'next/link';
 import { adminNavItems } from '@/components/layout/dashboard-nav';
 import { cn } from '@/lib/utils';
-import { Monitor, Smartphone, Globe, Cloud } from 'lucide-react';
+import { Monitor, Smartphone, Globe, Cloud, Sun, Maximize2, Minimize2, Image as ImageIcon } from 'lucide-react';
+
+const BACKGROUNDS = [
+  // High-quality Nature Images (Mountains, Forests, Oceans, Sky)
+  // Optimized: Lower resolution (w=1280), quality (q=60) for performance
+  "url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1280&q=60')",
+  "url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1280&q=60')",
+  "url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1280&q=60')",
+  "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&q=60')",
+  "url('https://images.unsplash.com/photo-1519681393798-3828fb4090bb?auto=format&fit=crop&w=1280&q=60')",
+  "url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1280&q=60')",
+  "url('https://images.unsplash.com/photo-1426604966848-d7adac402bff?auto=format&fit=crop&w=1280&q=60')",
+  "url('https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=1280&q=60')",
+];
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -19,9 +32,42 @@ export default function AdminDashboard() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [currentTime, setCurrentTime] = useState(new Date());
+  
+  // UI State
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [bgIndex, setBgIndex] = useState(0);
 
   // Keep existing loading
   const [loading, setLoading] = useState(true);
+
+  // Auto-switch background every 2 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBgIndex((prev) => (prev + 1) % BACKGROUNDS.length);
+    }, 2 * 60 * 1000); // 2 minutes
+    return () => clearInterval(interval);
+  }, []);
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    }
+  };
+
+  // Listen for fullscreen change events (ESC key etc)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   // ... (useEffects for time and data fetching remain same)
   useEffect(() => {
@@ -70,29 +116,62 @@ export default function AdminDashboard() {
   return (
     <DashboardShell requireAdmin>
       <div
-        className="relative min-h-[calc(100vh-6rem)] overflow-hidden rounded-xl bg-white border border-slate-200 shadow-sm"
+        className="relative min-h-[calc(100vh-6rem)] overflow-hidden rounded-xl bg-white border border-slate-200 shadow-sm transition-all duration-500"
       >
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 mix-blend-multiply" />
+        {/* Dynamic Background Layer */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-opacity duration-[3000ms] ease-in-out opacity-20 will-change-[opacity,background-image]"
+          style={{ backgroundImage: BACKGROUNDS[bgIndex] }}
+        />
+        
+        {/* Optimized Noise: Lower opacity, pointer-events-none */}
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-multiply pointer-events-none" />
 
         <div className="relative z-10 flex h-full flex-col p-6 text-slate-900 md:p-8">
 
-          {/* Top Bar - Weather & Date */}
+          {/* Top Bar - Weather, Time & Controls */}
           <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3 bg-slate-100/80 backdrop-blur-md px-4 py-2 rounded-full border border-slate-200 shadow-sm">
-              <Cloud className="h-5 w-5 text-blue-500" />
+            <div className="flex items-center gap-4 bg-white/60 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/50 shadow-sm transition-all hover:shadow-md hover:bg-white/80 group">
+              <div className="relative w-10 h-10 flex items-center justify-center">
+                <Sun className="absolute h-8 w-8 text-amber-400 animate-pulse-glow" strokeWidth={1.5} />
+                <Cloud className="absolute h-8 w-8 text-blue-400/90 fill-white animate-float translate-x-2 translate-y-1" strokeWidth={1.5} />
+                <Cloud className="absolute h-5 w-5 text-blue-300/80 fill-white animate-float-delayed -translate-x-2 translate-y-2 opacity-80" strokeWidth={1.5} />
+              </div>
               <div className="flex flex-col leading-none">
-                <span className="text-sm font-semibold text-slate-700">24°</span>
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Sunny</span>
+                <div className="flex items-start gap-1">
+                  <span className="text-2xl font-light text-slate-800 tracking-tight">24</span>
+                  <span className="text-sm text-slate-500 font-normal mt-1">°C</span>
+                </div>
+                <span className="text-[11px] font-medium text-slate-500 uppercase tracking-widest pt-1">Partly Cloudy</span>
               </div>
             </div>
 
-            <div className="text-right">
-              <h2 className="text-5xl font-extralight tracking-tight text-slate-900 drop-shadow-sm">
-                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </h2>
-              <p className="text-sm font-medium text-slate-500 tracking-wide uppercase mt-1">
-                {currentTime.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}
-              </p>
+            <div className="flex items-center gap-6">
+              <div className="text-right hidden sm:block">
+                <h2 className="text-5xl font-extralight tracking-tight text-slate-900 drop-shadow-sm">
+                  {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </h2>
+                <p className="text-sm font-medium text-slate-500 tracking-wide uppercase mt-1">
+                  {currentTime.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 space-x-2 border-l border-slate-200/30 pl-6">
+                <button
+                  onClick={() => setBgIndex((prev) => (prev + 1) % BACKGROUNDS.length)}
+                  className="p-3 rounded-full bg-white/40 hover:bg-white border border-white/50 shadow-sm backdrop-blur-sm transition-all hover:scale-105 active:scale-95 text-slate-600 hover:text-slate-900 hover:shadow-md"
+                  title="Switch Background"
+                >
+                  <ImageIcon className="h-5 w-5" strokeWidth={1.5} />
+                </button>
+                <button 
+                  onClick={toggleFullScreen}
+                  className="p-3 rounded-full bg-white/40 hover:bg-white border border-white/50 shadow-sm backdrop-blur-sm transition-all hover:scale-105 active:scale-95 text-slate-600 hover:text-slate-900 hover:shadow-md"
+                  title={isFullscreen ? "Exit Full Screen" : "Enter Full Screen"}
+                >
+                  {isFullscreen ? <Minimize2 className="h-5 w-5" strokeWidth={1.5} /> : <Maximize2 className="h-5 w-5" strokeWidth={1.5} />}
+                </button>
+              </div>
             </div>
           </div>
 

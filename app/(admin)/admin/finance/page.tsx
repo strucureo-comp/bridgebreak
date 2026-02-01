@@ -119,13 +119,13 @@ export default function AdminFinancePage() {
       transactionsData.forEach(t => {
         if (t.type === 'income') {
           auditEngineInstance.recordIncome(t.amount, t.date, t.description, t.id, 'acc_bank', {
-            currency: t.currency,
+            currency: t.currency as CurrencyCode | undefined,
             exchange_rate: t.exchange_rate,
             tax_rate_id: t.tax_rate_id,
           });
         } else {
           auditEngineInstance.recordExpense(t.amount, t.date, t.description, t.id, 'acc_supplies', {
-            currency: t.currency,
+            currency: t.currency as CurrencyCode | undefined,
             exchange_rate: t.exchange_rate,
             tax_rate_id: t.tax_rate_id,
           });
