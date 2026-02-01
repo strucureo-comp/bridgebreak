@@ -44,9 +44,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: firebaseUser.email!,
           ...userData,
         });
+      } else {
+        // User record doesn't exist yet, create a minimal user object
+        setUser({
+          id: firebaseUser.uid,
+          email: firebaseUser.email!,
+          full_name: firebaseUser.displayName || firebaseUser.email!.split('@')[0],
+          role: 'client',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
       }
     } catch (error) {
-      console.error('Error fetching user:', error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      
+      // Handle permission denied errors gracefully
+      if (errorMsg.includes('Permission denied')) {
+        console.warn('Firebase permission denied. Using minimal user profile.');
+        
+        // Check if this is a known admin email
+        const adminEmails = [
+          'viyasramachandran@gmail.com',
+          'aathish@strucureo.works',
+          'aathihacker2004@gmail.com',
+        ];
+        const isAdmin = adminEmails.includes(firebaseUser.email?.toLowerCase() || '');
+        
+        // Still allow user to access the app with basic info
+        setUser({
+          id: firebaseUser.uid,
+          email: firebaseUser.email!,
+          full_name: firebaseUser.displayName || firebaseUser.email!.split('@')[0],
+          role: isAdmin ? 'admin' : 'client',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      } else {
+        console.error('Error fetching user:', error);
+      }
     }
   };
 

@@ -1,6 +1,7 @@
 import { LucideIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { TermHelp } from './term-help';
 
 interface StatsCardProps {
   title: string;
@@ -14,6 +15,7 @@ interface StatsCardProps {
   className?: string;
   iconColor?: string; // e.g. "text-blue-500"
   iconBgColor?: string; // e.g. "bg-blue-100"
+  helpTerm?: string;
 }
 
 export function StatsCard({
@@ -24,7 +26,8 @@ export function StatsCard({
   trend,
   className,
   iconColor = "text-muted-foreground",
-  iconBgColor = "bg-muted/20"
+  iconBgColor = "bg-muted/20",
+  helpTerm
 }: StatsCardProps) {
   return (
     <Card className={cn(
@@ -32,7 +35,10 @@ export function StatsCard({
       className
     )}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <div className="flex items-center">
+          <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+          {helpTerm && <TermHelp term={helpTerm} />}
+        </div>
         {Icon && (
           <div className={cn("p-2 rounded-full", iconBgColor)}>
             <Icon className={cn("h-4 w-4", iconColor)} />

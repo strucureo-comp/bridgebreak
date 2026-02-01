@@ -33,6 +33,9 @@ export interface Transaction {
   description: string;
   date: string;
   attachment_url?: string;
+  tax_rate_id?: string;
+  currency?: string;
+  exchange_rate?: number;
   created_by: string;
   created_at: string;
   updated_at: string;
