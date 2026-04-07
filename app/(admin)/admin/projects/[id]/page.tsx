@@ -34,7 +34,10 @@ import {
   EyeOff,
   Image as ImageIcon,
   Globe,
-  Paperclip
+  Paperclip,
+  DollarSign,
+  ShieldAlert,
+  Calendar as CalendarIcon
 } from 'lucide-react';
 import Link from 'next/link';
 import type { Project, ProjectStatus } from '@/lib/db/types';
@@ -54,6 +57,12 @@ export default function AdminProjectCockpitPage({ params }: { params: { id: stri
     github_link: '',
     live_preview_type: 'url' as 'url' | 'image',
     live_preview_url: '',
+    estimated_cost: 0,
+    maintenance_cost: 0,
+    maintenance_frequency: 'monthly' as 'monthly' | 'yearly',
+    internal_resource_cost: 0,
+    resource_frequency: 'monthly' as 'monthly' | 'yearly',
+    next_billing_date: '',
     technical_config: [] as Array<{
       id: string;
       label: string;
@@ -83,6 +92,12 @@ export default function AdminProjectCockpitPage({ params }: { params: { id: stri
         github_link: data.github_link || '',
         live_preview_type: data.live_preview_type || 'url',
         live_preview_url: data.live_preview_url || '',
+        estimated_cost: data.estimated_cost || 0,
+        maintenance_cost: data.maintenance_cost || 0,
+        maintenance_frequency: data.maintenance_frequency || 'monthly',
+        internal_resource_cost: data.internal_resource_cost || 0,
+        resource_frequency: data.resource_frequency || 'monthly',
+        next_billing_date: data.next_billing_date || '',
         technical_config: data.technical_config || []
       });
     }
@@ -275,6 +290,133 @@ export default function AdminProjectCockpitPage({ params }: { params: { id: stri
                     onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
                     className="border-none p-0 h-auto bg-transparent font-bold text-lg shadow-none focus-visible:ring-0"
                   />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Financials & Recurring Costs Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="border-blue-100 dark:border-blue-900/30">
+            <CardHeader className="bg-blue-50/50 dark:bg-blue-900/10 rounded-t-xl py-4">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                <DollarSign className="h-5 w-5" />
+                <CardTitle className="text-base uppercase tracking-wider font-bold">Client Financials</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Setup / One-time Fee</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="number"
+                      value={formData.estimated_cost}
+                      onChange={(e) => setFormData({ ...formData, estimated_cost: parseFloat(e.target.value) || 0 })}
+                      className="pl-9 font-bold"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Next Billing Date</Label>
+                  <div className="relative">
+                    <CalendarIcon className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="date"
+                      value={formData.next_billing_date}
+                      onChange={(e) => setFormData({ ...formData, next_billing_date: e.target.value })}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <h4 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Recurring Maintenance</h4>
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-muted-foreground">Charge Amount</Label>
+                    <Input
+                      type="number"
+                      value={formData.maintenance_cost}
+                      onChange={(e) => setFormData({ ...formData, maintenance_cost: parseFloat(e.target.value) || 0 })}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-muted-foreground">Frequency</Label>
+                    <Select
+                      value={formData.maintenance_frequency}
+                      onValueChange={(v: any) => setFormData({ ...formData, maintenance_frequency: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="yearly">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-orange-100 dark:border-orange-900/30">
+            <CardHeader className="bg-orange-50/50 dark:bg-orange-900/10 rounded-t-xl py-4 flex flex-row items-center justify-between">
+              <div className="flex items-center gap-2 text-orange-700 dark:text-orange-400">
+                <ShieldAlert className="h-5 w-5" />
+                <CardTitle className="text-base uppercase tracking-wider font-bold">Internal Resource Costs</CardTitle>
+              </div>
+              <Badge variant="outline" className="text-[10px] bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-200 uppercase font-black tracking-widest">Admin Only</Badge>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <p className="text-xs text-muted-foreground italic leading-relaxed">
+                Track our actual expenses for hosting, APIs, and third-party services. This data is hidden from the client view.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Real Cost to Us</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-orange-400" />
+                    <Input
+                      type="number"
+                      value={formData.internal_resource_cost}
+                      onChange={(e) => setFormData({ ...formData, internal_resource_cost: parseFloat(e.target.value) || 0 })}
+                      className="pl-9 font-bold"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Frequency</Label>
+                  <Select
+                    value={formData.resource_frequency}
+                    onValueChange={(v: any) => setFormData({ ...formData, resource_frequency: v })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-muted/50 border border-dashed flex flex-col items-center justify-center text-center">
+                <span className="text-[10px] font-bold uppercase text-muted-foreground mb-1 tracking-widest">Project Profitability</span>
+                <div className={`text-2xl font-black ${
+                  (formData.maintenance_cost - formData.internal_resource_cost) >= 0 ? 'text-emerald-600' : 'text-red-600'
+                }`}>
+                  ${(formData.maintenance_cost - formData.internal_resource_cost).toLocaleString()}
+                  <span className="text-xs font-medium text-muted-foreground ml-1">/{formData.maintenance_frequency === 'monthly' ? 'mo' : 'yr'}</span>
                 </div>
               </div>
             </CardContent>

@@ -12,8 +12,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Paperclip, User, Building2, Mail, Phone } from 'lucide-react';
+import { Loader2, ArrowLeft, Paperclip, User, Building2, Mail, Phone, DollarSign, Calendar, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { FileUploader } from '@/components/common/file-uploader';
 import type { User as DBUser, ProjectStatus } from '@/lib/db/types';
@@ -38,6 +39,13 @@ export default function AdminNewProjectPage() {
     document_url: '',
     status: 'pending' as ProjectStatus,
     estimated_cost: '',
+    
+    // Recurring Costs
+    maintenance_cost: '',
+    maintenance_frequency: 'monthly' as 'monthly' | 'yearly',
+    internal_resource_cost: '',
+    resource_frequency: 'monthly' as 'monthly' | 'yearly',
+    next_billing_date: '',
   });
 
   useEffect(() => {
@@ -74,6 +82,13 @@ export default function AdminNewProjectPage() {
       document_url: formData.document_url || undefined,
       status: formData.status,
       estimated_cost: formData.estimated_cost ? parseFloat(formData.estimated_cost) : undefined,
+      
+      // Recurring Costs Logic
+      maintenance_cost: formData.maintenance_cost ? parseFloat(formData.maintenance_cost) : undefined,
+      maintenance_frequency: formData.maintenance_frequency,
+      internal_resource_cost: formData.internal_resource_cost ? parseFloat(formData.internal_resource_cost) : undefined,
+      resource_frequency: formData.resource_frequency,
+      next_billing_date: formData.next_billing_date || undefined,
     };
 
     if (clientType === 'registered') {
@@ -214,16 +229,17 @@ export default function AdminNewProjectPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Project Details</CardTitle>
-              <CardDescription>
-                Basic information about the project
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2 flex-1">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Project Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Project Details</CardTitle>
+                <CardDescription>
+                  Basic information about the project
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
                   <Label htmlFor="title">Project Title</Label>
                   <Input
                     id="title"
@@ -253,69 +269,162 @@ export default function AdminNewProjectPage() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Describe the project requirements, features, and goals..."
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  disabled={loading}
-                  rows={4}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="github_link">GitHub Link</Label>
-                  <Input
-                    id="github_link"
-                    type="url"
-                    placeholder="https://github.com/username/repo"
-                    value={formData.github_link}
-                    onChange={(e) => setFormData({ ...formData, github_link: e.target.value })}
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Describe requirements..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     disabled={loading}
+                    rows={4}
                   />
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="estimated_cost">One-time Fee</Label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="estimated_cost"
+                        type="number"
+                        placeholder="0.00"
+                        className="pl-9"
+                        value={formData.estimated_cost}
+                        onChange={(e) => setFormData({ ...formData, estimated_cost: e.target.value })}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="next_billing">Next Billing Date</Label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="next_billing"
+                        type="date"
+                        className="pl-9"
+                        value={formData.next_billing_date}
+                        onChange={(e) => setFormData({ ...formData, next_billing_date: e.target.value })}
+                        disabled={loading}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Recurring Financials */}
+            <Card className="border-blue-100 dark:border-blue-900/30">
+              <CardHeader className="bg-blue-50/50 dark:bg-blue-900/10 rounded-t-xl">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-blue-700 dark:text-blue-400">Financials & Resources</CardTitle>
+                </div>
+                <CardDescription>
+                  Set recurring billing for maintenance and track internal costs
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6 pt-6">
+                {/* Client Facing */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" /> Client Billing (Maintenance)
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="maintenance_cost">Charge Amount</Label>
+                      <Input
+                        id="maintenance_cost"
+                        type="number"
+                        placeholder="Monthly Fee"
+                        value={formData.maintenance_cost}
+                        onChange={(e) => setFormData({ ...formData, maintenance_cost: e.target.value })}
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Frequency</Label>
+                      <Select
+                        value={formData.maintenance_frequency}
+                        onValueChange={(v: any) => setFormData({ ...formData, maintenance_frequency: v })}
+                        disabled={loading}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="yearly">Yearly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Internal Tracking */}
+                <div className="space-y-4 p-4 rounded-xl bg-orange-50/30 dark:bg-orange-950/10 border border-orange-100 dark:border-orange-900/20">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold uppercase tracking-widest text-orange-700 dark:text-orange-400 flex items-center gap-2">
+                      <ShieldAlert className="h-4 w-4" /> Internal Costs
+                    </h4>
+                    <span className="text-[10px] bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 px-2 py-0.5 rounded-full font-bold">ADMIN ONLY</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">This cost is hidden from the client and used for internal profitability tracking.</p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="internal_resource_cost">Real Resource Cost</Label>
+                      <Input
+                        id="internal_resource_cost"
+                        type="number"
+                        placeholder="Cost to us"
+                        className="bg-white dark:bg-background"
+                        value={formData.internal_resource_cost}
+                        onChange={(e) => setFormData({ ...formData, internal_resource_cost: e.target.value })}
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Frequency</Label>
+                      <Select
+                        value={formData.resource_frequency}
+                        onValueChange={(v: any) => setFormData({ ...formData, resource_frequency: v })}
+                        disabled={loading}
+                      >
+                        <SelectTrigger className="bg-white dark:bg-background">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="yearly">Yearly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="estimated_cost">Estimated Cost</Label>
-                  <Input
-                    id="estimated_cost"
-                    type="number"
-                    placeholder="0.00"
-                    value={formData.estimated_cost}
-                    onChange={(e) => setFormData({ ...formData, estimated_cost: e.target.value })}
+                  <Label>Project Files / Requirements</Label>
+                  <FileUploader
+                    bucket="projects"
+                    path={`${formData.client_id || 'manual'}/documents`}
+                    onUploadComplete={(url) => setFormData({ ...formData, document_url: url })}
+                    label="Upload Documents"
                     disabled={loading}
                   />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Project Document</Label>
-                <FileUploader
-                  bucket="projects"
-                  path={`${formData.client_id || 'manual'}/documents`}
-                  onUploadComplete={(url) => setFormData({ ...formData, document_url: url })}
-                  label="Upload BRD, Wireframes, etc."
-                  disabled={loading}
-                />
-                {formData.document_url && (
-                  <p className="text-sm text-green-600 flex items-center gap-1">
-                    <Paperclip className="h-3 w-3" />
-                    Document attached successfully
-                  </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
           <div className="flex gap-4">
             <Button type="submit" size="lg" className="px-8" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Project
+              Launch Project
             </Button>
             <Button
               type="button"

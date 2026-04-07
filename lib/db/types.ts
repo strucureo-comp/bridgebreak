@@ -99,6 +99,15 @@ export interface Project {
   manual_client_company?: string;
   manual_client_phone?: string;
 
+  // RECURRING COSTS & MAINTENANCE
+  maintenance_cost?: number;        // What we charge the client
+  maintenance_frequency?: 'monthly' | 'yearly';
+  
+  internal_resource_cost?: number;  // What we actually pay (Admin only)
+  resource_frequency?: 'monthly' | 'yearly';
+  
+  next_billing_date?: string;
+
   created_at: string;
   updated_at: string;
 }
