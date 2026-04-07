@@ -11,7 +11,7 @@ import type { Project, SupportRequest, Invoice, Transaction } from '@/lib/db/typ
 import Link from 'next/link';
 import { adminNavItems } from '@/components/layout/dashboard-nav';
 import { cn } from '@/lib/utils';
-import { Monitor, Smartphone, Globe, Cloud, Sun, Maximize2, Minimize2, Image as ImageIcon } from 'lucide-react';
+import { Monitor, Smartphone, Globe, Cloud, Sun, Maximize2, Minimize2, Image as ImageIcon, Plus } from 'lucide-react';
 
 const BACKGROUNDS = [
   // High-quality Nature Images (Mountains, Forests, Oceans, Sky)
@@ -131,19 +131,29 @@ export default function AdminDashboard() {
 
           {/* Top Bar - Weather, Time & Controls */}
           <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4 bg-white/60 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/50 shadow-sm transition-all hover:shadow-md hover:bg-white/80 group">
-              <div className="relative w-10 h-10 flex items-center justify-center">
-                <Sun className="absolute h-8 w-8 text-amber-400 animate-pulse-glow" strokeWidth={1.5} />
-                <Cloud className="absolute h-8 w-8 text-blue-400/90 fill-white animate-float translate-x-2 translate-y-1" strokeWidth={1.5} />
-                <Cloud className="absolute h-5 w-5 text-blue-300/80 fill-white animate-float-delayed -translate-x-2 translate-y-2 opacity-80" strokeWidth={1.5} />
-              </div>
-              <div className="flex flex-col leading-none">
-                <div className="flex items-start gap-1">
-                  <span className="text-2xl font-light text-slate-800 tracking-tight">24</span>
-                  <span className="text-sm text-slate-500 font-normal mt-1">°C</span>
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="flex items-center gap-4 bg-white/60 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/50 shadow-sm transition-all hover:shadow-md hover:bg-white/80 group">
+                <div className="relative w-10 h-10 flex items-center justify-center">
+                  <Sun className="absolute h-8 w-8 text-amber-400 animate-pulse-glow" strokeWidth={1.5} />
+                  <Cloud className="absolute h-8 w-8 text-blue-400/90 fill-white animate-float translate-x-2 translate-y-1" strokeWidth={1.5} />
+                  <Cloud className="absolute h-5 w-5 text-blue-300/80 fill-white animate-float-delayed -translate-x-2 translate-y-2 opacity-80" strokeWidth={1.5} />
                 </div>
-                <span className="text-[11px] font-medium text-slate-500 uppercase tracking-widest pt-1">Partly Cloudy</span>
+                <div className="flex flex-col leading-none">
+                  <div className="flex items-start gap-1">
+                    <span className="text-2xl font-light text-slate-800 tracking-tight">24</span>
+                    <span className="text-sm text-slate-500 font-normal mt-1">°C</span>
+                  </div>
+                  <span className="text-[11px] font-medium text-slate-500 uppercase tracking-widest pt-1">Partly Cloudy</span>
+                </div>
               </div>
+
+              <Link
+                href="/admin/projects/new"
+                className="flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-all active:scale-95 font-semibold text-sm"
+              >
+                <Plus className="h-4 w-4" />
+                New Project
+              </Link>
             </div>
 
             <div className="flex items-center gap-6">
