@@ -11,7 +11,7 @@ import {
 } from 'firebase/auth';
 import { ref, set, get, child } from 'firebase/database';
 import { auth, database } from './config';
-import { User } from '@/lib/db/types';
+import { User, UserRole } from '@/lib/db/types';
 import { createUser } from './database';
 
 interface AuthContextType {
@@ -19,7 +19,7 @@ interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string, role?: UserRole) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null; success: boolean }>;
   refreshUser: () => Promise<void>;
@@ -116,15 +116,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, role: UserRole = 'client') => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Check if this email is a known admin
+      const adminEmails = [
+        'viyasramachandran@gmail.com',
+        'aathish@strucureo.works',
+        'aathihacker2004@gmail.com',
+      ];
+      const finalRole = adminEmails.includes(email.toLowerCase()) ? 'admin' : role;
+
       const userData: Omit<User, 'id'> = {
         email: user.email!,
         full_name: fullName,
-        role: 'client',
+        role: finalRole,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };

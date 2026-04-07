@@ -507,6 +507,51 @@ export async function markNotificationAsRead(notificationId: string): Promise<bo
   }
 }
 
+export async function createInvitation(invitation: { email: string; role: UserRole; invited_by: string }): Promise<string | null> {
+  try {
+    const invitationsRef = ref(database, 'invitations');
+    const newInvitationRef = push(invitationsRef);
+
+    const invitationData = cleanData({
+      ...invitation,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+    });
+
+    await set(newInvitationRef, invitationData);
+
+    // Send actual email
+    const sender = await getUser(invitation.invited_by);
+    if (sender) {
+      await sendInvitationEmail(invitation.email, invitation.role, sender.full_name);
+    }
+
+    return newInvitationRef.key;
+  } catch (error) {
+    console.error('Error creating invitation:', error);
+    return null;
+  }
+}
+
+export async function getInvitations(): Promise<any[]> {
+  try {
+    const invitationsRef = ref(database, 'invitations');
+    const snapshot = await get(invitationsRef);
+
+    if (!snapshot.exists()) return [];
+
+    const invitations: any[] = [];
+    snapshot.forEach((childSnapshot) => {
+      invitations.push({ id: childSnapshot.key, ...childSnapshot.val() });
+    });
+
+    return invitations.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  } catch (error) {
+    console.error('Error getting invitations:', error);
+    return [];
+  }
+}
+
 export async function createMeetingRequest(meeting: Omit<MeetingRequest, 'id' | 'created_at' | 'updated_at' | 'status'>): Promise<string | null> {
   try {
     const meetingsRef = ref(database, 'meeting_requests');

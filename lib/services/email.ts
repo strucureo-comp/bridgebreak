@@ -144,6 +144,33 @@ export async function sendNotificationEmail(
   });
 }
 
+export async function sendInvitationEmail(
+  to: string,
+  role: string,
+  invitedBy: string,
+) {
+  const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/register?email=${encodeURIComponent(to)}&role=${role}`;
+  
+  return sendEmail({
+    to,
+    subject: `Invitation to join BridgeBreak as ${role}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+        <h1 style="color: #000; font-size: 24px;">Join the Team</h1>
+        <p>You have been invited by <strong>${invitedBy}</strong> to join BridgeBreak as a <strong>${role}</strong>.</p>
+        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+          <p style="margin: 0;">Click the button below to complete your registration and join the workspace.</p>
+        </div>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${inviteLink}" style="background-color: #000; color: #fff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Accept Invitation</a>
+        </div>
+        <p style="font-size: 12px; color: #666;">If you weren't expecting this invitation, you can safely ignore this email.</p>
+        <p>Best regards,<br>The BridgeBreak Team</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendInvoiceEmail(
   to: string,
   invoiceNumber: string,
