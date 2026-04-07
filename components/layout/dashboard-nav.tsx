@@ -19,6 +19,7 @@ import {
     Inbox,
     Target,
     Map,
+    Code,
 } from 'lucide-react';
 import {
     Tooltip,
@@ -31,7 +32,7 @@ interface NavItem {
     title: string;
     href: string;
     icon: React.ComponentType<{ className?: string }>;
-    role?: 'client' | 'admin';
+    role?: ('client' | 'admin' | 'dev')[];
 }
 
 export const clientNavItems: NavItem[] = [
@@ -39,31 +40,31 @@ export const clientNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutDashboard,
-        role: 'client',
+        role: ['client'],
     },
     {
         title: 'Projects',
         href: '/projects',
         icon: FolderKanban,
-        role: 'client',
+        role: ['client'],
     },
     {
         title: 'Invoices',
         href: '/invoices',
         icon: FileText,
-        role: 'client',
+        role: ['client'],
     },
     {
         title: 'Support',
         href: '/support',
         icon: MessageSquare,
-        role: 'client',
+        role: ['client'],
     },
     {
         title: 'Meetings',
         href: '/meetings',
         icon: Calendar,
-        role: 'client',
+        role: ['client'],
     },
 ];
 
@@ -72,85 +73,85 @@ export const adminNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/admin/dashboard',
         icon: LayoutDashboard,
-        role: 'admin',
+        role: ['admin', 'dev'],
     },
     {
         title: 'Enquiries',
         href: '/admin/enquiries',
         icon: Inbox,
-        role: 'admin',
+        role: ['admin'],
     },
     {
         title: 'Leads',
         href: '/admin/leads',
         icon: Target,
-        role: 'admin',
+        role: ['admin'],
     },
     {
         title: 'Projects',
         href: '/admin/projects',
         icon: FolderKanban,
-        role: 'admin',
+        role: ['admin', 'dev'],
     },
     {
         title: 'Planning',
         href: '/admin/planning',
         icon: Map,
-        role: 'admin',
+        role: ['admin', 'dev'],
     },
     {
         title: 'Clients',
         href: '/admin/clients',
         icon: Users,
-        role: 'admin',
+        role: ['admin'],
     },
     {
         title: 'Support',
         href: '/admin/support',
         icon: MessageSquare,
-        role: 'admin',
+        role: ['admin', 'dev'],
     },
     {
         title: 'Meetings',
         href: '/admin/meetings',
         icon: Calendar,
-        role: 'admin',
+        role: ['admin', 'dev'],
     },
     {
         title: 'Invoices',
         href: '/admin/invoices',
         icon: FileText,
-        role: 'admin',
+        role: ['admin'],
     },
     {
         title: 'Quotations',
         href: '/admin/quotations',
         icon: ScrollText,
-        role: 'admin',
+        role: ['admin'],
     },
     {
         title: 'Finance',
         href: '/admin/finance',
         icon: DollarSign,
-        role: 'admin',
+        role: ['admin'],
     },
     {
         title: 'Team',
         href: '/admin/team',
         icon: UserCog,
-        role: 'admin',
+        role: ['admin'],
     },
     {
         title: 'Plans',
         href: '/admin/plans',
         icon: CreditCard,
-        role: 'admin',
+        role: ['admin'],
     },
     {
         title: 'Settings',
         href: '/admin/settings',
         icon: Settings,
-        role: 'admin',
+        role: ['admin'],
     },
 ];
 
@@ -159,11 +160,9 @@ interface DashboardNavProps {
     isCollapsed?: boolean;
 }
 
-// ... (imports remain the same)
 export function DashboardNav({ onNavClick, isCollapsed }: DashboardNavProps) {
     const pathname = usePathname();
     const { user } = useAuth();
-    // ...
 
     const allowedFinanceEmails = [
         'viyasramachandran@gmail.com',
@@ -171,13 +170,21 @@ export function DashboardNav({ onNavClick, isCollapsed }: DashboardNavProps) {
         'aathihacker2004@gmail.com',
     ];
 
-    let navItems = user?.role === 'admin' ? adminNavItems : clientNavItems;
+    // Determine initial set based on if they are in admin routes or client routes
+    const isAdminMode = user?.role === 'admin' || user?.role === 'dev';
+    let navItems = isAdminMode ? adminNavItems : clientNavItems;
 
-    // Filter out Finance tab if user is not authorized
+    // Filter by role access
+    navItems = navItems.filter(item => {
+        if (!item.role) return true;
+        return item.role.includes(user?.role as any);
+    });
+
+    // Special Finance filter for Admins
     if (user?.role === 'admin') {
         navItems = navItems.filter(item => {
             if (item.title === 'Finance') {
-                return user.email && allowedFinanceEmails.includes(user.email.toLowerCase()); // Ensure lower case match
+                return user.email && allowedFinanceEmails.includes(user.email.toLowerCase());
             }
             return true;
         });

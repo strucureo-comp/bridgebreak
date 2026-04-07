@@ -30,7 +30,10 @@ import {
   EyeOff,
   Image as ImageIcon,
   Paperclip,
-  Trash2
+  Trash2,
+  CreditCard,
+  Calendar as CalendarIcon,
+  DollarSign
 } from 'lucide-react';
 import {
   Dialog,
@@ -220,6 +223,55 @@ export default function ClientProjectCockpitPage({ params }: { params: { id: str
             </CardContent>
           </Card>
         </div>
+
+        {/* Maintenance & Subscription (Recommendation 4) */}
+        {project.maintenance_cost !== undefined && project.maintenance_cost > 0 && (
+          <Card className="border-blue-100 bg-blue-50/10 overflow-hidden shadow-sm">
+            <div className="h-1 w-full bg-blue-500/20" />
+            <CardHeader className="py-4">
+              <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                <CreditCard className="h-4 w-4" />
+                <CardTitle className="text-sm font-bold uppercase tracking-wider">Maintenance & Subscription</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900 border border-blue-50">
+                  <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                    <DollarSign className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-tight">Amount</p>
+                    <p className="text-lg font-black tracking-tighter">
+                      ${project.maintenance_cost.toLocaleString()} 
+                      <span className="text-[10px] font-normal text-muted-foreground italic ml-1">/{project.maintenance_frequency === 'monthly' ? 'mo' : 'yr'}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900 border border-blue-50">
+                  <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                    <CalendarIcon className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-tight">Next Billing</p>
+                    <p className="text-lg font-black tracking-tighter">{project.next_billing_date ? new Date(project.next_billing_date).toLocaleDateString() : 'Pending'}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900 border border-blue-50">
+                  <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-tight">Status</p>
+                    <p className="text-lg font-black text-blue-600 uppercase tracking-tighter">Active</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Main Visual Section */}
         <Card className="overflow-hidden">
