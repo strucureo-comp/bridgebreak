@@ -6,7 +6,8 @@ import {
   sendSupportTicketEmail,
   sendInvoiceEmail,
   sendMeetingStatusEmail,
-  sendNotificationEmail
+  sendNotificationEmail,
+  sendInvitationEmail
 } from '../services/email';
 import type {
   Project,
