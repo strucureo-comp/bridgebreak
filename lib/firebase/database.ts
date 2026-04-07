@@ -13,6 +13,7 @@ import type {
   Invoice,
   SupportRequest,
   User,
+  UserRole,
   ProjectFile,
   ProjectUpdate,
   SupportMessage,

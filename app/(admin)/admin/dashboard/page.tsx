@@ -120,7 +120,7 @@ export default function AdminDashboard() {
       >
         {/* Dynamic Background Layer */}
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-opacity duration-[3000ms] ease-in-out opacity-20 will-change-[opacity,background-image]"
+          className="absolute inset-0 bg-cover bg-center transition-opacity [transition-duration:3000ms] ease-in-out opacity-20 will-change-[opacity,background-image]"
           style={{ backgroundImage: BACKGROUNDS[bgIndex] }}
         />
         
