@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { FolderKanban, ArrowRight, Calendar, DollarSign, Star } from 'lucide-react';
+import Link from 'next/link';
 import { EmptyState } from '@/components/common/empty-state';
 import { toast } from 'sonner';
 import type { Project } from '@/lib/db/types';
@@ -68,6 +69,12 @@ export default function AdminProjectsPage() {
             <h1 className="text-3xl font-bold tracking-tight">Project Management</h1>
             <p className="text-muted-foreground">Monitor and manage all client deployments</p>
           </div>
+          <Button asChild>
+            <Link href="/admin/projects/new">
+              <FolderKanban className="mr-2 h-4 w-4" />
+              New Project
+            </Link>
+          </Button>
         </div>
 
         <ProjectStats projects={getAllFilteredProjects()} />
