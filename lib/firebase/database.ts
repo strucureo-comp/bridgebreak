@@ -88,15 +88,17 @@ export async function createProject(project: Omit<Project, 'id' | 'created_at' |
 
     await set(newProjectRef, projectData);
 
-    // Notify Client
-    await createNotification({
-      user_id: project.client_id,
-      title: 'New Project Created',
-      message: `Your project "${project.title}" has been created and is now active.`,
-      type: 'project',
-      link: `/projects/${newProjectRef.key}`,
-      read: false
-    });
+    // Notify Client if project is linked to a registered user
+    if (project.client_id) {
+      await createNotification({
+        user_id: project.client_id,
+        title: 'New Project Created',
+        message: `Your project "${project.title}" has been created and is now active.`,
+        type: 'project',
+        link: `/projects/${newProjectRef.key}`,
+        read: false
+      });
+    }
 
     return newProjectRef.key;
   } catch (error) {

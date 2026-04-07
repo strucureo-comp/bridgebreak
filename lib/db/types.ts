@@ -93,6 +93,12 @@ export interface Project {
 
   is_featured?: boolean; // Mark project as featured for portfolio/showcase
 
+  // Manual Client Details (for non-registered clients)
+  manual_client_name?: string;
+  manual_client_email?: string;
+  manual_client_company?: string;
+  manual_client_phone?: string;
+
   created_at: string;
   updated_at: string;
 }
